@@ -24,20 +24,22 @@ public class MainActivity extends AppCompatActivity {
         send =(Button) findViewById(R.id.send_button);
     }
 
-    public void send_message(View view){
+    public void connect_server(View view){
         //Connet to server
         new ConnectTask().execute("");
+    }
 
-        //call sendMessage
-        if (mTcpClient != null){
+    public void send_message(View view) {
+        if (mTcpClient != null) {
             mTcpClient.sendMessage(e1.getText().toString());
         }
+    }
 
+    public void close_connection(View view) {
         if (mTcpClient != null) {
             mTcpClient.stopClient();
         }
     }
-
 
     public class ConnectTask extends AsyncTask<String, String, TcpClient> {
 

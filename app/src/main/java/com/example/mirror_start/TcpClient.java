@@ -12,7 +12,7 @@ import java.net.Socket;
 public class TcpClient {
 
     public static final String TAG = TcpClient.class.getSimpleName();
-    public static final String SERVER_IP = "192.168.1.116"; //server IP address
+    public static final String SERVER_IP = "192.168.1.117"; //server IP address
     public static final int SERVER_PORT = 1234;
     // message to send to the server
     private String mServerMessage;
@@ -109,6 +109,7 @@ public class TcpClient {
             } catch (Exception e) {
                 Log.e("TCP", "S: Error", e);
             } finally {
+                Log.d("hello","hello");
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
                 socket.close();
