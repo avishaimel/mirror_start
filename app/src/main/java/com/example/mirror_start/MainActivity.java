@@ -2,6 +2,7 @@ package com.example.mirror_start;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +13,7 @@ import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button send;
+    Button send, connect, close_connection, animation_1, animation_2;
     EditText e1;
     TcpClient mTcpClient;
 
@@ -21,7 +22,40 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         e1 = (EditText) findViewById(R.id.editText);
+
+        // These are the TCP client relevant buttons
         send =(Button) findViewById(R.id.send_button);
+        connect =(Button) findViewById(R.id.connect_button);
+        close_connection =(Button) findViewById(R.id.close_button);
+
+        // changing to animation 1 activity
+        animation_1 =(Button) findViewById(R.id.animation1);
+        animation_1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openAnimation(1);
+            }
+        });
+        // changing to animation 2 activity
+        animation_1 =(Button) findViewById(R.id.animation2);
+        animation_1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openAnimation(2);
+            }
+        });
+
+    }
+
+    public void openAnimation(int val) {
+        if (val == 1) {
+            Intent intent = new Intent(this, first_animation.class);
+            startActivity(intent);
+        }
+        else {
+            Intent intent = new Intent(this, animation2.class);
+            startActivity(intent);
+        }
     }
 
     public void connect_server(View view){
