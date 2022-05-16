@@ -20,8 +20,17 @@
       android:id="@+id/object"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_centerHorizontal="true"
-      android:layout_marginTop="178dp"
+      android:layout_centerVertical="true"
       android:src="@drawable/ic_launcher_foreground"></ImageView>
+
+  <Button
+      android:id="@+id/return_to_main"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_above="@id/object"
+      android:layout_centerHorizontal="true"
+      android:layout_marginBottom="180dp"
+      android:onClick="BackToMain"
+      android:text="Return to main Activity" />
 
 </RelativeLayout>

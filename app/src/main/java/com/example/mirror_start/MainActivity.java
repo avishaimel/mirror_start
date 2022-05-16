@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         // changing to animation 2 activity
-        animation_1 =(Button) findViewById(R.id.animation2);
-        animation_1.setOnClickListener(new View.OnClickListener() {
+        animation_2 =(Button) findViewById(R.id.animation2);
+        animation_2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openAnimation(2);
@@ -52,11 +52,12 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, first_animation.class);
             startActivity(intent);
         }
-        else {
+        else if(val == 2) {
             Intent intent = new Intent(this, animation2.class);
             startActivity(intent);
         }
     }
+
 
     public void connect_server(View view){
         //Connet to server

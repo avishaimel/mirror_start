@@ -15,19 +15,18 @@ public class first_animation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_animation);
-        linear_movement();
-        //BackToMain();
+        ImageView view = (ImageView) findViewById(R.id.object);
+        linear_movement(view);
 
     }
 
-    public void BackToMain(){
+    public void BackToMain(View view){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 
-    public void linear_movement(){
-        ImageView  object = findViewById(R.id.object);
+    public void linear_movement(View view){
         Animation lin_mov = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.line_animation);
-        object.startAnimation(lin_mov);
+        view.startAnimation(lin_mov);
     }
 }
