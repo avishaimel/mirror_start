@@ -10,52 +10,55 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.ArrayList;
+import java.util.Stack;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    Button send, connect, close_connection, animation_1, animation_2;
+    Button send, connect, close_connection, animation, sample;
     EditText e1;
     TcpClient mTcpClient;
+    public static final String EXTRA = "exp_param";
+    ArrayList<float[]> coordinates = new ArrayList<float[]>();
+    int mat_index = 0;
+    private static final int EXP_ACTIVITY_REQUEST_CODE = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        e1 = (EditText) findViewById(R.id.editText);
 
         // These are the TCP client relevant buttons
         send =(Button) findViewById(R.id.send_button);
         connect =(Button) findViewById(R.id.connect_button);
         close_connection =(Button) findViewById(R.id.close_button);
+        e1 = (EditText) findViewById(R.id.editText);
 
-        // changing to animation 1 activity
-        animation_1 =(Button) findViewById(R.id.animation1);
-        animation_1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openAnimation(1);
-            }
-        });
         // changing to animation 2 activity
-        animation_2 =(Button) findViewById(R.id.animation2);
-        animation_2.setOnClickListener(new View.OnClickListener() {
+        animation =(Button) findViewById(R.id.animation);
+        animation.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                openAnimation(2);
-            }
+            public void onClick(View view) { openExperiment();}
         });
+        send.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {send_message(e1.getText().toString());}
+        });
+
+        try{
+            ArrayList<float[]> coordinates_res = (ArrayList<float[]>)getIntent().getSerializableExtra("exp_res");
+        }catch (Exception e){ Log.d("Err", "no results yet");}
 
     }
 
-    public void openAnimation(int val) {
-        if (val == 1) {
-            Intent intent = new Intent(this, first_animation.class);
-            startActivity(intent);
-        }
-        else if(val == 2) {
-            Intent intent = new Intent(this, animation2.class);
-            startActivity(intent);
-        }
+    public void openExperiment() {
+
+            Intent intent = new Intent(this, experiment.class);
+            intent.putExtra(EXTRA, coordinates);
+            startActivityForResult(intent, EXP_ACTIVITY_REQUEST_CODE);
+
     }
 
 
@@ -64,15 +67,35 @@ public class MainActivity extends AppCompatActivity {
         new ConnectTask().execute("");
     }
 
-    public void send_message(View view) {
+    public void send_message(String str) {
         if (mTcpClient != null) {
-            mTcpClient.sendMessage(e1.getText().toString());
+            mTcpClient.sendMessage(str);
         }
     }
 
     public void close_connection(View view) {
         if (mTcpClient != null) {
             mTcpClient.stopClient();
+        }
+    }
+
+    //For each csv line -  convert to float x/y values and add to coordinates List
+    public void  AddCoordinates(ArrayList<float[]> coordinates, String values){
+        String[] row = values.split(",");
+        float[] row_val = new float[2];
+        row_val[0] = Float.parseFloat(row[0]);
+        row_val[1] = Float.parseFloat(row[1]);
+        coordinates.add(row_val);
+    }
+
+    public void send_results(ArrayList<float[]> coordinates_res){
+        String sample_to_send;
+        float x,y;
+        for(int i = 0; i<coordinates_res.size(); i++){
+            x = coordinates_res.get(i)[0];
+            y = coordinates_res.get(i)[1];
+            sample_to_send = String.valueOf(x) + String.valueOf(y);
+            send_message(sample_to_send);
         }
     }
 
@@ -101,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
             //response received from server
             Log.d("test", "response " + values[0]);
             //process server response here....
+
+            if(!(values[0].isEmpty())) {AddCoordinates(coordinates, values[0]);}
 
         }
     }

@@ -4,31 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".animation2">
+    tools:context=".experiment">
 
     <ImageView
         android:id="@+id/object"
         android:layout_width="126dp"
         android:layout_height="121dp"
         android:layout_centerInParent="true"
-        app:srcCompat="@drawable/reddot" />
+        app:srcCompat="@drawable/dot" />
 
     <Button
         android:id="@+id/start_animation"
-        android:layout_width="207dp"
-        android:layout_height="123dp"
+        android:layout_width="189dp"
+        android:layout_height="75dp"
         android:layout_above="@id/object"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="233dp"
+        android:layout_marginBottom="139dp"
         android:text="press to start" />
 
     <Button
         android:id="@+id/return_to_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/start_animation"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="80dp"
+        android:layout_above="@id/start_animation"
+        android:layout_marginBottom="20dp"
         android:onClick="BackToMain"
         android:text="Return to main Activity" />
 
