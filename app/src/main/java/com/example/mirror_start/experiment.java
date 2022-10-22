@@ -21,7 +21,7 @@ public class experiment extends AppCompatActivity {
     public static final int width = Resources.getSystem().getDisplayMetrics().widthPixels;
     public static final int height = Resources.getSystem().getDisplayMetrics().heightPixels;
 
-    Button start_animation;
+    Button start_animation, BackToMain;
     ArrayList<float[]> coordinates_res = new ArrayList<float[]>();
 
     @Override
@@ -40,6 +40,11 @@ public class experiment extends AppCompatActivity {
             @Override
             public void onClick(View view){ animate(dot, createPath(coordinates), numOfSamples);}
         });
+        BackToMain = (Button) findViewById(R.id.return_to_main);
+        BackToMain.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View view){ BackToMainFunc(view);}
+        }));
     }
 
     // creates and return path for animation
@@ -87,7 +92,7 @@ public class experiment extends AppCompatActivity {
         return false;
     }
 
-    public void BackToMain(View view){
+    public void BackToMainFunc(View view){
         Intent intent = new Intent();
         intent.putExtra("exp_res", coordinates_res);
         setResult(RESULT_OK, intent);

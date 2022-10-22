@@ -1,7 +1,6 @@
 package com.example.mirror_start;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -9,7 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
+import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -46,11 +45,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {send_message(e1.getText().toString());}
         });
+    }
 
-        try{
-            ArrayList<float[]> coordinates_res = (ArrayList<float[]>)getIntent().getSerializableExtra("exp_res");
-        }catch (Exception e){ Log.d("Err", "no results yet");}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == EXP_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                ArrayList<float[]> coordinates_res  = (ArrayList<float[]>)data.getSerializableExtra("exp_res");
+                Log.d("worked:", String.valueOf(coordinates_res.get(0)[0]));
+            }
 
+        }
     }
 
     public void openExperiment() {
