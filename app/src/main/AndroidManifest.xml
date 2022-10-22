@@ -12,10 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Mirror_start">
         <activity
-            android:name=".animation2"
-            android:exported="false" />
-        <activity
-            android:name=".first_animation"
+            android:name=".experiment"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
