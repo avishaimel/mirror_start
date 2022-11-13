@@ -8,14 +8,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
 import java.util.ArrayList;
-import java.util.Stack;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    Button send, connect, close_connection, animation, sample;
+    Button send, connect, close_connection, experiment, sample;
     EditText e1;
     TcpClient mTcpClient;
     public static final String EXTRA = "exp_param";
@@ -29,15 +28,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // These are the TCP client relevant buttons
+        /** These are the TCP client relevant buttons */
         send =(Button) findViewById(R.id.send_button);
         connect =(Button) findViewById(R.id.connect_button);
         close_connection =(Button) findViewById(R.id.close_button);
         e1 = (EditText) findViewById(R.id.editText);
 
-        // changing to animation 2 activity
-        animation =(Button) findViewById(R.id.animation);
-        animation.setOnClickListener(new View.OnClickListener() {
+        /** changing to experiment activity */
+        experiment =(Button) findViewById(R.id.StartExperiment);
+        experiment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) { openExperiment();}
         });
@@ -47,13 +46,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Receiving the experiment result coordinates */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == EXP_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 ArrayList<float[]> coordinates_res  = (ArrayList<float[]>)data.getSerializableExtra("exp_res");
+                SendResults(coordinates_res);
                 Log.d("worked:", String.valueOf(coordinates_res.get(0)[0]));
+                coordinates_res.clear();
+//                close_connection_no_button();
             }
 
         }
@@ -85,6 +89,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    public void close_connection_no_button(){
+//        if (mTcpClient != null) {
+//            mTcpClient.stopClient();
+//        }
+//    }
+
     //For each csv line -  convert to float x/y values and add to coordinates List
     public void  AddCoordinates(ArrayList<float[]> coordinates, String values){
         String[] row = values.split(",");
@@ -94,15 +104,16 @@ public class MainActivity extends AppCompatActivity {
         coordinates.add(row_val);
     }
 
-    public void send_results(ArrayList<float[]> coordinates_res){
+    public void SendResults(ArrayList<float[]> coordinates_res){
         String sample_to_send;
         float x,y;
         for(int i = 0; i<coordinates_res.size(); i++){
             x = coordinates_res.get(i)[0];
             y = coordinates_res.get(i)[1];
-            sample_to_send = String.valueOf(x) + String.valueOf(y);
+            sample_to_send = x + "," + y;
             send_message(sample_to_send);
         }
+        send_message("finish");
     }
 
     public class ConnectTask extends AsyncTask<String, String, TcpClient> {
