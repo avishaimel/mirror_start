@@ -107,13 +107,19 @@ public class MainActivity extends AppCompatActivity {
     public void SendResults(ArrayList<float[]> coordinates_res){
         String sample_to_send;
         float x,y;
-        for(int i = 0; i<coordinates_res.size(); i++){
+        Thread touch = new Thread();
+        try {
+            for(int i = 0; i<coordinates_res.size(); i++){
             x = coordinates_res.get(i)[0];
             y = coordinates_res.get(i)[1];
             sample_to_send = x + "," + y;
             send_message(sample_to_send);
+            touch.sleep(2);
         }
-        send_message("finish");
+            touch.sleep(10);
+            send_message("finish");
+        }catch (Exception e){}
+
     }
 
     public class ConnectTask extends AsyncTask<String, String, TcpClient> {

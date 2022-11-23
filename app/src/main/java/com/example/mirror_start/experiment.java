@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class experiment extends AppCompatActivity {
 
@@ -24,6 +25,8 @@ public class experiment extends AppCompatActivity {
     Button start_animation, BackToMain;
     ArrayList<float[]> coordinates_res = new ArrayList<float[]>();
     ImageView RedDot;
+    AtomicBoolean actionDownFlag = new AtomicBoolean(true);
+    float x, y;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,7 @@ public class experiment extends AppCompatActivity {
         animation.start();
     }
 
+
     /**
      * Starts when users touch screen
      * Receives users touch and sample it in 60 HZ
@@ -77,37 +81,62 @@ public class experiment extends AppCompatActivity {
     {
         ImageView GreenDot = findViewById(R.id.GreenDot);
         float[] coordinates_sample = new float[2];
-        Thread touch = new Thread();
+        x = event.getX();
+        y = event.getY();
+        Thread t = new Thread(new MyRunnable(x,y));
+        actionDownFlag.set(false);
         try {
-            touch.sleep(1000/60);// sample in 60 HZ
-            coordinates_sample[0]= event.getX() ;
-            coordinates_sample[1] = (float) (event.getY());
-            coordinates_res.add(coordinates_sample);
-            Log.d("Tag", "X = " + String.valueOf(coordinates_sample[0]) + ", Y = " + String.valueOf(coordinates_sample[1]));
-        }catch (Exception e){}
+            Thread.sleep(1000/6);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-//        String s = String.valueOf(x);
-//        Log.d("Tag", s);
+
+
         float xDown = 0, yDown = 0, moovedX = 0, moovedY = 0 , distanceX, distanceY;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                xDown = event.getX();
-                yDown = event.getY();
+                actionDownFlag.set(true);
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                moovedX = event.getX();
-                moovedY = event.getY();
-
-                distanceX = moovedX - xDown;
-                distanceY = moovedY - yDown;
-
-                GreenDot.setX(distanceX);
+                actionDownFlag.set(true);
+                GreenDot.setX(x);
                 GreenDot.setY((int) (RedDot.getY()*1.2));
                 break;
+
+            case MotionEvent.ACTION_UP:
+                actionDownFlag.set(false);
+                return true;
         }
+        t.start();
         return true;
     }
+
+    public class MyRunnable implements Runnable {
+        private float x, y;
+        private float[] coordinates_sample = new float[2];
+
+        public MyRunnable(float x, float y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public void run() {
+            try {
+                while (actionDownFlag.get()){
+                    coordinates_sample[0] = x;
+                    coordinates_sample[1] = y;
+                    coordinates_res.add(coordinates_sample);
+                    Log.d("Tag", "X = " + String.valueOf(coordinates_sample[0]) + ", Y = " + String.valueOf(coordinates_sample[1]));
+                    Thread.sleep(1000 / 6);// sample in 60 HZ
+                }
+            } catch (Exception e) {}
+        }
+    }
+
+
+
 
     /**
      * On click function - return to MainActivity
