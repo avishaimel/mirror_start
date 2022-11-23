@@ -86,7 +86,7 @@ public class experiment extends AppCompatActivity {
         Thread t = new Thread(new MyRunnable(x,y));
         actionDownFlag.set(false);
         try {
-            Thread.sleep(1000/6);
+            Thread.sleep(1000/60);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -129,7 +129,7 @@ public class experiment extends AppCompatActivity {
                     coordinates_sample[1] = y;
                     coordinates_res.add(coordinates_sample);
                     Log.d("Tag", "X = " + String.valueOf(coordinates_sample[0]) + ", Y = " + String.valueOf(coordinates_sample[1]));
-                    Thread.sleep(1000 / 6);// sample in 60 HZ
+                    Thread.sleep(1000 / 60);// sample in 60 HZ
                 }
             } catch (Exception e) {}
         }
