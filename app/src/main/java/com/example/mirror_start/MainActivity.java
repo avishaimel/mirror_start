@@ -55,8 +55,9 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 ArrayList<float[]> coordinates_res  = (ArrayList<float[]>)data.getSerializableExtra("exp_res");
                 SendResults(coordinates_res);
-                Log.d("worked:", String.valueOf(coordinates_res.get(0)[0]));
+                Log.d("worked:", String.valueOf(coordinates_res.size()));
                 coordinates_res.clear();
+                coordinates.clear();
 //                close_connection_no_button();
             }
 
