@@ -1,32 +1,50 @@
 package com.example.mirror_start;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    Button send, connect, close_connection, experiment, sample;
+    Button send, connect, close_connection, experiment, displayResults;
     EditText e1;
     TcpClient mTcpClient;
     public static final String EXTRA = "exp_param";
     ArrayList<float[]> coordinates = new ArrayList<float[]>();
     int mat_index = 0;
     private static final int EXP_ACTIVITY_REQUEST_CODE = 0;
+    boolean is_png = false;
+    private static MainActivity instance;
+    Bitmap bmp = null;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        instance = this;
 
         /** These are the TCP client relevant buttons */
         send =(Button) findViewById(R.id.send_button);
@@ -40,6 +58,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) { openExperiment();}
         });
+        displayResults =(Button) findViewById(R.id.displayResults);
+        displayResults.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) { openResults();}
+        });
+
         send.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {send_message(e1.getText().toString());}
@@ -72,6 +96,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void openResults() {
+
+        Intent intent = new Intent(this, DisplayResults.class);
+        startActivity(intent);
+
+    }
+
 
     public void connect_server(View view){
         //Connet to server
@@ -90,11 +121,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    public void close_connection_no_button(){
-//        if (mTcpClient != null) {
-//            mTcpClient.stopClient();
-//        }
-//    }
 
     //For each csv line -  convert to float x/y values and add to coordinates List
     public void  AddCoordinates(ArrayList<float[]> coordinates, String values){
@@ -106,21 +132,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void SendResults(ArrayList<float[]> coordinates_res){
-        String sample_to_send;
-        float x,y;
+        String sample_to_send ="";
+        float x,y,t;
         Thread touch = new Thread();
         try {
             for(int i = 0; i<coordinates_res.size(); i++){
             x = coordinates_res.get(i)[0];
             y = coordinates_res.get(i)[1];
-            sample_to_send = x + "," + y;
-            send_message(sample_to_send);
+            t = coordinates_res.get(i)[2];
+            sample_to_send = sample_to_send + x + "," + y + "," + t + "\n";
             touch.sleep(2);
         }
-            touch.sleep(10);
-            send_message("finish");
+            sample_to_send = sample_to_send +"end";
+            send_message(sample_to_send);
         }catch (Exception e){}
 
+    }
+
+    public String getFilePath(String filename){
+        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
+        File imageDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File file = new File(imageDirectory, filename);
+        return file.getPath();
+    }
+
+    public static MainActivity getInstance() {
+        return instance;
     }
 
     public class ConnectTask extends AsyncTask<String, String, TcpClient> {
@@ -149,7 +186,15 @@ public class MainActivity extends AppCompatActivity {
             Log.d("test", "response " + values[0]);
             //process server response here....
 
-            if(!(values[0].isEmpty())) {AddCoordinates(coordinates, values[0]);}
+            if(values[0].equals("START")){
+                is_png = true;
+            }
+            else if (values[0].equals("END")){
+                is_png = false;
+            }
+            else if(!(values[0].isEmpty()) & !is_png) {
+                AddCoordinates(coordinates, values[0]);
+            }
 
         }
     }

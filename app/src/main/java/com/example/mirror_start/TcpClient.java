@@ -1,13 +1,29 @@
 package com.example.mirror_start;
 
+import static android.app.PendingIntent.getActivity;
+
+import android.content.ContextWrapper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.DrawFilter;
+import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
+
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Random;
 
 public class TcpClient {
 
@@ -24,6 +40,7 @@ public class TcpClient {
     private PrintWriter mBufferOut;
     // used to read messages from the server
     private BufferedReader mBufferIn;
+    private InputStream inputStream = null;
 
     /**
      * Constructor of the class. OnMessagedReceived listens for the messages received from server
@@ -70,6 +87,7 @@ public class TcpClient {
         mServerMessage = null;
     }
 
+
     public void run() {
 
         mRun = true;
@@ -87,21 +105,67 @@ public class TcpClient {
 
                 //sends the message to the server
                 mBufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                inputStream = socket.getInputStream();
 
                 //receives the message which the server sends back
-                mBufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-
+                mBufferIn = new BufferedReader(new InputStreamReader(inputStream));
                 //in this while the client listens for the messages sent by the server
+                String fileName = null;
                 while (mRun) {
 
                     mServerMessage = mBufferIn.readLine();
+                    if (mServerMessage == null) continue;
+
+                    if(mServerMessage.equals("START")){
+                        fileName = "location.png";
+                    }
+                    if (mServerMessage.equals("MIDDLE")){
+                        fileName = "speeds.png";
+                    }
+
+                    if(mServerMessage.contains("valid")){
+                        try {
+                            sendMessage("start");
+//                            receiveFile(MainActivity.getInstance().getFilePath(), Integer.parseInt(mServerMessage.replaceAll("[^0-9]", "")));
+                            int fileSize = Integer.parseInt(mServerMessage.replaceAll("[^0-9]", ""));
+                            String finalName = MainActivity.getInstance().getFilePath(fileName);
+                            byte[] data = new byte[8 * 1024];
+                            int bToRead;
+                            FileOutputStream fos = new FileOutputStream(finalName);
+                            BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+                            // make sure not to read more bytes than filesize
+                            if (fileSize > data.length) bToRead = data.length;
+                            else bToRead = fileSize;
+                            Thread.sleep(200);
+                            while (true) {
+                                Thread.sleep(100);
+                                int bytesRead = inputStream.read(data, 0, bToRead);
+                                if (bytesRead < bToRead){
+                                    if(bytesRead>0) {
+                                        bos.write(data, 0, bytesRead);
+                                    }
+                                    break;
+                                }
+                                bos.write(data, 0, bytesRead);
+                                if (bytesRead == fileSize)
+                                    break;
+                            }
+                            bos.close();
+//                            String a = mBufferIn.readLine();
+                            sendMessage("done");
+                            Thread.sleep(1);
+                            continue;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 
                     if (mServerMessage != null && mMessageListener != null) {
                         //call the method messageReceived from MyActivity class
                         mMessageListener.messageReceived(mServerMessage);
-                    }
 
+                        }
                 }
 
                 Log.d("RESPONSE FROM SERVER", "S: Received Message: '" + mServerMessage + "'");
@@ -109,7 +173,6 @@ public class TcpClient {
             } catch (Exception e) {
                 Log.e("TCP", "S: Error", e);
             } finally {
-                Log.d("hello","hello");
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
                 socket.close();
@@ -121,10 +184,30 @@ public class TcpClient {
 
     }
 
+
+//    private void saveImage(Bitmap fiknalBitmap){
+//
+//        String root = Environment.getExternalStorageDirectory().toString();
+//        File f = new File(root + "/image");
+//        f.mkdirs();
+//        Random generator = new Random();
+//        int n = 1000;
+//        n = generator.nextInt(n);
+//        String fname = "Image-" + n + ".png";
+//        File file = new File(f,fname);
+//    }
+
+
+
     //Declare the interface. The method messageReceived(String message) will must be implemented in the Activity
     //class at on AsyncTask doInBackground
     public interface OnMessageReceived {
         public void messageReceived(String message);
     }
+
+
+
+
+
 
 }

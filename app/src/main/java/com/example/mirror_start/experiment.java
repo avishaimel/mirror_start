@@ -9,9 +9,11 @@ import android.graphics.Path;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,19 +23,21 @@ public class experiment extends AppCompatActivity {
 
 
     public static final int width = Resources.getSystem().getDisplayMetrics().widthPixels;
-    public static final int height = (int) (Resources.getSystem().getDisplayMetrics().heightPixels/1.5);
+    public static final int height = (int) (Resources.getSystem().getDisplayMetrics().heightPixels);
 
     Button start_animation, BackToMain;
+    TextView anime_text;
     ArrayList<float[]> coordinates = new ArrayList<float[]>();
     ArrayList<float[]> coordinates_res = new ArrayList<float[]>();
     ImageView RedDot, GreenDot;
     AtomicBoolean actionDownFlag = new AtomicBoolean(true);
     AtomicLong x = new AtomicLong();
     AtomicLong y = new AtomicLong();
-    long hold_counter = 1;
-    boolean is_running = false;
+    long hold_counter = 1, duration;
+    boolean is_running = false, is_touch = false;
     Sleeper sleeper = new Sleeper();
-
+    long t=0;
+    ObjectAnimator animation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +46,8 @@ public class experiment extends AppCompatActivity {
         int numOfSamples = coordinates.size();
         GreenDot = findViewById(R.id.GreenDot);
         RedDot = findViewById(R.id.RedDot);
-
+        anime_text = findViewById(R.id.textView);
+        anime_text.setVisibility(View.INVISIBLE);
         // creating button to start animation with onClick listener
         start_animation = findViewById(R.id.start_animation);
         start_animation.setOnClickListener(new View.OnClickListener() {
@@ -61,14 +66,14 @@ public class experiment extends AppCompatActivity {
      *  can add different Path method to control the path*/
     public Path createPath(ArrayList<float[]> coordinates) {
         Path path = new Path();
-        path.moveTo(width*coordinates.get(0)[0], height*coordinates.get(0)[1]);
-        path.lineTo(width*coordinates.get(0)[0], height*coordinates.get(0)[1]);
+        path.moveTo(width*coordinates.get(0)[0], (float)(height*coordinates.get(0)[1]/1.5));
+        path.lineTo(width*coordinates.get(0)[0], (float)(height*coordinates.get(0)[1]/1.5));
         for(int i=1; i<coordinates.size(); i++){
             if(coordinates.get(i)[0] == coordinates.get(i-1)[0]){
                 hold_counter++;
                 continue;
             }
-            path.lineTo(width*coordinates.get(i)[0], height*coordinates.get(i)[1]);
+            path.lineTo(width*coordinates.get(i)[0], (float)(height*coordinates.get(i)[1]/1.5));
         }
         return path;
     }
@@ -80,23 +85,17 @@ public class experiment extends AppCompatActivity {
      * call animation time thread that sets the sampling time
       */
     public void animate(View view, Path path, int numOfSamples) {
-        long duration = (numOfSamples/60)* 1000L - (hold_counter/60)*1000;
+        duration = (numOfSamples / 60) * 1000L - (hold_counter / 60) * 1000;
         Log.d("duration=", String.valueOf(duration));
-        Thread animation_time = new Thread(new animation_sleep(duration+(hold_counter/60)*1000));
+        anime_text.setVisibility(View.VISIBLE);
+        is_touch = true;
 
-        x.set((long)(width*coordinates.get(0)[0]));
-        y.set((long)(height*coordinates.get(0)[1]));
-        Thread sample = new Thread(new sample_runnable());
 
-        ObjectAnimator animation = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+        animation = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
         animation.setDuration(duration);
-        animation.setStartDelay((hold_counter/60)*1000);
+        animation.setStartDelay((hold_counter / 60) * 1000);
+        animation.setInterpolator(new LinearInterpolator());
         Log.d("hold_counter=", String.valueOf(hold_counter));
-        animation.start();
-
-        sample.start();
-        animation_time.start();
-
     }
 
 
@@ -108,9 +107,23 @@ public class experiment extends AppCompatActivity {
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+        Thread sample = new Thread(new sample_runnable());
+        Thread animation_time = new Thread(new animation_sleep(duration + (hold_counter / 60) * 1000));
 
-        if (!is_running)
+
+        if(!is_touch & !is_running)
             return false;
+        if (is_touch & !is_running) {
+            x.set((long)(event.getX()));
+            y.set((long)(event.getY()));
+            animation.start();
+            sample.start();
+            animation_time.start();
+            is_touch=false;
+            return  false;
+        }
+
+        anime_text.setVisibility(View.INVISIBLE);
         x.set((long)(event.getX()));
         y.set((long)(event.getY()));
 
@@ -126,6 +139,7 @@ public class experiment extends AppCompatActivity {
                 break;
         }
         return false;
+
     }
 
     /**
@@ -138,15 +152,15 @@ public class experiment extends AppCompatActivity {
 
         public void run() {
             try {
-                long startTime, endTime, sleep_loss_avg = 0;
-                startTime = System.nanoTime();
+                long startTime, endTime, sleep_loss_avg = 0, timestamp, time_reference;
+                time_reference = System.nanoTime();
+                startTime = time_reference;
                 while (actionDownFlag.get()){
                     coordinates_sample[0] = ((float)(x.get()))/width;
                     coordinates_sample[1] = ((float)(y.get()))/height;
-                    add_coordinates(coordinates_res, coordinates_sample[0], coordinates_sample[1]);
+                    timestamp = System.nanoTime() - time_reference;
+                    add_coordinates(coordinates_res, coordinates_sample[0], coordinates_sample[1], timestamp);
 
-                    Log.d("Tag", "X = " + coordinates_sample[0] + ", Y = " + coordinates_sample[1]);
-//                    Log.d("exe time", String.valueOf(System.nanoTime() - startTime));
                     endTime = System.nanoTime();
                     sleeper.sleepNanos(1000000000/60 - (endTime - startTime) -sleep_loss_avg);
                     sleep_loss_avg = ((System.nanoTime() - endTime) - (1000000000/60- (endTime - startTime)));
@@ -158,10 +172,11 @@ public class experiment extends AppCompatActivity {
             }
         }
 
-        public void add_coordinates(ArrayList<float[]> coordinates_res, float x, float y){
-            float[] samples = new float[2];
+        public void add_coordinates(ArrayList<float[]> coordinates_res, float x, float y, long t){
+            float[] samples = new float[3];
             samples[0] = x;
             samples[1] = y;
+            samples[2] = (float)(t);
             coordinates_res.add(samples);
         }
     }
@@ -183,13 +198,12 @@ public class experiment extends AppCompatActivity {
                 sleeper.sleepNanos(duration*1000000);
                 actionDownFlag.set(false);
                 is_running = false;
+                anime_text.setVisibility(View.INVISIBLE);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
-
-
 
 
     /**
