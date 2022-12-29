@@ -4,82 +4,140 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/main_background"
     tools:context=".MainActivity">
 
-    |<EditText
+
+    <EditText
         android:id="@+id/editText"
-        android:layout_width="286dp"
-        android:layout_height="73dp"
-        android:layout_marginStart="60dp"
-        android:layout_marginBottom="140dp"
+        android:layout_width="348dp"
+        android:layout_height="74dp"
         android:ems="10"
+        android:hint="Enter experiment file name"
         android:inputType="textPersonName"
+        android:selectAllOnFocus="false"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.03"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.635" />
+        app:layout_constraintVertical_bias="0.516" />
 
     <Button
         android:id="@+id/send_button"
-        android:layout_width="113dp"
-        android:layout_height="81dp"
+        android:layout_width="172dp"
+        android:layout_height="56dp"
+        android:backgroundTint="#ffffff"
+        android:backgroundTintMode="add"
+        android:fontFamily="sans-serif"
         android:text="Send"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.499"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.573" />
+
+    <Button
+        android:id="@+id/close_button"
+        android:layout_width="195dp"
+        android:layout_height="59dp"
+        android:backgroundTint="#ffdb79"
+        android:fontFamily="sans-serif"
+        android:onClick="close_connection"
+        android:text="Disconnect"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.309"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.669" />
+
+    <Button
+        android:id="@+id/connect_button"
+        android:layout_width="195dp"
+        android:layout_height="59dp"
+        android:backgroundTint="#ffdb79"
+        android:fontFamily="sans-serif"
+        android:onClick="connect_server"
+        android:text="Connect to server"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.694"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.669" />
+
+    <Button
+        android:id="@+id/StartExperiment"
+        android:layout_width="163dp"
+        android:layout_height="59dp"
+        android:backgroundTint="#cde6e6"
+        android:fontFamily="sans-serif"
+        android:text="Start animation"
+        android:textColor="#000000"
+        android:enabled="false"
+        android:alpha="0.5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.662"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.389" />
+
+    <Button
+        android:id="@+id/displayResults"
+        style="@style/SeeThroughButton"
+        android:layout_width="163dp"
+        android:layout_height="59dp"
+        android:backgroundTint="#cde6e6"
+        android:fontFamily="sans-serif"
+        android:text="Show results"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.331"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.389" />
+
+    <Button
+        android:id="@+id/instruction"
+        android:layout_width="371dp"
+        android:layout_height="65dp"
+        android:backgroundTint="#ffffff"
+        android:fontFamily="sans-serif"
+        android:onClick="openInstructions"
+        android:text="First time? press for instructions"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.263" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="20dp" />
+
+    <TextView
+        android:id="@+id/connection"
+        android:layout_width="200dp"
+        android:layout_height="43dp"
+        style="@style/ConnectionStatusTextViewStyleRed"
+        android:text="Disconnected"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.404" />
-
-    <Button
-        android:id="@+id/close_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="close_connection"
-        android:text="Close connection"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.515"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.837" />
-
-    <Button
-        android:id="@+id/connect_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="connect_server"
-        android:text="Connect to server"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.751" />
-
-
-    <Button
-        android:id="@+id/StartExperiment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start animation"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.105" />
-
-    <Button
-        android:id="@+id/displayResults"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="552dp"
-        android:text="Show results"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintVertical_bias="0.723" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

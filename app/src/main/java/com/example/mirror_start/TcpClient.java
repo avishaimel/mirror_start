@@ -28,7 +28,7 @@ import java.util.Random;
 public class TcpClient {
 
     public static final String TAG = TcpClient.class.getSimpleName();
-    public static final String SERVER_IP = "192.168.1.115"; //server IP address
+    public static final String SERVER_IP = "192.168.1.116"; //server IP address
     public static final int SERVER_PORT = 1237;
     // message to send to the server
     private String mServerMessage;
@@ -59,7 +59,7 @@ public class TcpClient {
             @Override
             public void run() {
                 if (mBufferOut != null) {
-                    Log.d(TAG, "Sending: " + message);
+//                    Log.d(TAG, "Sending: " + message);
                     mBufferOut.println(message);
                     mBufferOut.flush();
                 }
@@ -75,6 +75,7 @@ public class TcpClient {
     public void stopClient() {
 
         mRun = false;
+        MainActivity.getInstance().setConnectionStatus(false);
 
         if (mBufferOut != null) {
             mBufferOut.flush();
@@ -86,6 +87,7 @@ public class TcpClient {
         mBufferOut = null;
         mServerMessage = null;
     }
+
 
 
     public void run() {
@@ -100,6 +102,7 @@ public class TcpClient {
 
             //create a socket to make the connection with the server
             Socket socket = new Socket(serverAddr, SERVER_PORT);
+            MainActivity.getInstance().setConnectionStatus(true);
 
             try {
 
@@ -176,10 +179,12 @@ public class TcpClient {
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
                 socket.close();
+                MainActivity.getInstance().setConnectionStatus(false);
             }
 
         } catch (Exception e) {
             Log.e("TCP", "C: Error", e);
+
         }
 
     }
@@ -204,6 +209,7 @@ public class TcpClient {
     public interface OnMessageReceived {
         public void messageReceived(String message);
     }
+
 
 
 

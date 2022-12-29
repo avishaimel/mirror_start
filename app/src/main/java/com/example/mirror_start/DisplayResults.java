@@ -10,6 +10,8 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class DisplayResults  extends AppCompatActivity {
         speedsImage.setImageBitmap(speeds);
         locationImage.setImageBitmap(location);
 
-        Button BackToMain = findViewById(R.id.return_to_main);
+        FloatingActionButton BackToMain = findViewById(R.id.return_to_main);
         BackToMain.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View view){ BackToMainFunc(view);}

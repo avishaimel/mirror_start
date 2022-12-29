@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -23,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 
 
@@ -30,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button send, connect, close_connection, experiment, displayResults;
     EditText e1;
+    TextView connection_status;
     TcpClient mTcpClient;
     public static final String EXTRA = "exp_param";
     ArrayList<float[]> coordinates = new ArrayList<float[]>();
@@ -51,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
         connect =(Button) findViewById(R.id.connect_button);
         close_connection =(Button) findViewById(R.id.close_button);
         e1 = (EditText) findViewById(R.id.editText);
+        connection_status = (TextView) findViewById(R.id.connection);
+
 
         /** changing to experiment activity */
         experiment =(Button) findViewById(R.id.StartExperiment);
@@ -82,16 +88,24 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("worked:", String.valueOf(coordinates_res.size()));
                 coordinates_res.clear();
                 coordinates.clear();
-//                close_connection_no_button();
+
+
             }
 
         }
+    }
+
+    public void openInstructions(View view){
+        Intent intent = new Intent(this, Instructions.class);
+        startActivity(intent);
     }
 
     public void openExperiment() {
 
             Intent intent = new Intent(this, experiment.class);
             intent.putExtra(EXTRA, coordinates);
+            experiment.setEnabled(false);
+            experiment.setAlpha((float)(0.5) );
             startActivityForResult(intent, EXP_ACTIVITY_REQUEST_CODE);
 
     }
@@ -111,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void send_message(String str) {
         if (mTcpClient != null) {
+            coordinates.clear();
             mTcpClient.sendMessage(str);
         }
     }
@@ -118,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
     public void close_connection(View view) {
         if (mTcpClient != null) {
             mTcpClient.stopClient();
+            connection_status.setText("Disconnected");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connection_status.setTextAppearance(R.style.ConnectionStatusTextViewStyleRed);
+            }
         }
     }
 
@@ -141,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             y = coordinates_res.get(i)[1];
             t = coordinates_res.get(i)[2];
             sample_to_send = sample_to_send + x + "," + y + "," + t + "\n";
-            touch.sleep(2);
+
         }
             sample_to_send = sample_to_send +"end";
             send_message(sample_to_send);
@@ -154,6 +173,21 @@ public class MainActivity extends AppCompatActivity {
         File imageDirectory = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File file = new File(imageDirectory, filename);
         return file.getPath();
+    }
+
+    public void setConnectionStatus(boolean status){
+        if (status){
+            connection_status.setText("Connected");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connection_status.setTextAppearance(R.style.ConnectionStatusTextViewStyleGreen);
+            }
+        }
+        else {
+            connection_status.setText("Disconnected");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connection_status.setTextAppearance(R.style.ConnectionStatusTextViewStyleRed);
+            }
+        }
     }
 
     public static MainActivity getInstance() {
@@ -176,6 +210,8 @@ public class MainActivity extends AppCompatActivity {
             });
             mTcpClient.run();
 
+
+
             return null;
         }
 
@@ -183,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
             //response received from server
-            Log.d("test", "response " + values[0]);
+//            Log.d("test", "response " + values[0]);
             //process server response here....
 
             if(values[0].equals("START")){
@@ -191,6 +227,10 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (values[0].equals("END")){
                 is_png = false;
+            }
+            else if(values[0].equals("csv file end")){
+                experiment.setEnabled(true);
+                experiment.setAlpha(1);
             }
             else if(!(values[0].isEmpty()) & !is_png) {
                 AddCoordinates(coordinates, values[0]);

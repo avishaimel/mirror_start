@@ -9,11 +9,14 @@ import android.graphics.Path;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.util.Log;
 import android.widget.TextView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,20 +44,26 @@ public class experiment extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_animation2);
+        setContentView(R.layout.experiment);
         coordinates = (ArrayList<float[]>)getIntent().getSerializableExtra("exp_param");
         int numOfSamples = coordinates.size();
         GreenDot = findViewById(R.id.GreenDot);
         RedDot = findViewById(R.id.RedDot);
+        RedDot.setVisibility(View.INVISIBLE);
+        GreenDot.setVisibility(View.INVISIBLE);
         anime_text = findViewById(R.id.textView);
         anime_text.setVisibility(View.INVISIBLE);
         // creating button to start animation with onClick listener
         start_animation = findViewById(R.id.start_animation);
         start_animation.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){ animate(RedDot, createPath(coordinates), numOfSamples);}
+            public void onClick(View view){
+
+                animate(RedDot, createPath(coordinates), numOfSamples);
+                start_animation.setVisibility(View.INVISIBLE);
+            }
         });
-        BackToMain = findViewById(R.id.return_to_main);
+        BackToMain = findViewById(R.id.back);
         BackToMain.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View view){ BackToMainFunc(view);}
@@ -66,14 +75,15 @@ public class experiment extends AppCompatActivity {
      *  can add different Path method to control the path*/
     public Path createPath(ArrayList<float[]> coordinates) {
         Path path = new Path();
-        path.moveTo(width*coordinates.get(0)[0], (float)(height*coordinates.get(0)[1]/1.5));
-        path.lineTo(width*coordinates.get(0)[0], (float)(height*coordinates.get(0)[1]/1.5));
-        for(int i=1; i<coordinates.size(); i++){
-            if(coordinates.get(i)[0] == coordinates.get(i-1)[0]){
+        path.moveTo(width*coordinates.get(0)[0]-(float)(RedDot.getWidth())/2, (height/2));
+        path.lineTo(width*coordinates.get(0)[0]-(float)(RedDot.getWidth())/2, (height/2));
+        int i=1;
+        while(coordinates.get(i)[0] == coordinates.get(i - 1)[0]) {
                 hold_counter++;
-                continue;
-            }
-            path.lineTo(width*coordinates.get(i)[0], (float)(height*coordinates.get(i)[1]/1.5));
+                i++;
+        }
+        for (int j = (int)hold_counter; j<coordinates.size(); j++){
+            path.lineTo(width*coordinates.get(j)[0]-(float)(RedDot.getWidth())/2, (float)(height/2));
         }
         return path;
     }
@@ -114,6 +124,9 @@ public class experiment extends AppCompatActivity {
         if(!is_touch & !is_running)
             return false;
         if (is_touch & !is_running) {
+            RedDot.setVisibility(View.VISIBLE);
+            GreenDot.setVisibility(View.VISIBLE);
+            anime_text.setVisibility(View.INVISIBLE);
             x.set((long)(event.getX()));
             y.set((long)(event.getY()));
             animation.start();
@@ -123,19 +136,17 @@ public class experiment extends AppCompatActivity {
             return  false;
         }
 
-        anime_text.setVisibility(View.INVISIBLE);
         x.set((long)(event.getX()));
         y.set((long)(event.getY()));
 
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-
-            case MotionEvent.ACTION_UP:
-                break;
 
             case MotionEvent.ACTION_MOVE:
-                GreenDot.setX(event.getX());
+                GreenDot.setX(event.getX()-(float)(GreenDot.getWidth())/2);
                 GreenDot.setY((float) (RedDot.getY() * 1.2));
+                break;
+
+            default:
                 break;
         }
         return false;
