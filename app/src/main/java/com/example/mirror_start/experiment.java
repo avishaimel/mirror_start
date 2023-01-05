@@ -75,15 +75,15 @@ public class experiment extends AppCompatActivity {
      *  can add different Path method to control the path*/
     public Path createPath(ArrayList<float[]> coordinates) {
         Path path = new Path();
-        path.moveTo(width*coordinates.get(0)[0]-(float)(RedDot.getWidth())/2, (height/2));
-        path.lineTo(width*coordinates.get(0)[0]-(float)(RedDot.getWidth())/2, (height/2));
+        path.moveTo(width*coordinates.get(0)[0]-(float)(RedDot.getWidth())/2, (float)(RedDot.getY()));
+        path.lineTo(width*coordinates.get(0)[0]-(float)(RedDot.getWidth())/2, (float)(RedDot.getY()));
         int i=1;
         while(coordinates.get(i)[0] == coordinates.get(i - 1)[0]) {
                 hold_counter++;
                 i++;
         }
         for (int j = (int)hold_counter; j<coordinates.size(); j++){
-            path.lineTo(width*coordinates.get(j)[0]-(float)(RedDot.getWidth())/2, (float)(height/2));
+            path.lineTo(width*coordinates.get(j)[0]-(float)(RedDot.getWidth())/2, (float)(RedDot.getY()));
         }
         return path;
     }
